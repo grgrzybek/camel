@@ -18,6 +18,7 @@ package org.apache.camel.component.file.remote;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.ResolveEndpointFailedException;
 import org.apache.camel.test.junit4.CamelTestSupport;
 import org.junit.Test;
 
@@ -134,10 +135,6 @@ public class UriConfigurationTest extends CamelTestSupport {
         assertRemoteFileEndpointFile("ftp://hostname/foo", "foo");
         assertRemoteFileEndpointFile("ftp://hostname/", "");
         assertRemoteFileEndpointFile("ftp://hostname", "");
-        assertRemoteFileEndpointFile("ftp://hostname//", "/");
-        assertRemoteFileEndpointFile("ftp://hostname//foo/bar", "/foo/bar");
-        assertRemoteFileEndpointFile("ftp://hostname//foo/bar/", "/foo/bar/");
-        assertRemoteFileEndpointFile("sftp://user@hostname:123//foo/bar?password=secret", "/foo/bar");
         assertRemoteFileEndpointFile("sftp://user@hostname:123?password=secret", "");
         assertRemoteFileEndpointFile("sftp://hostname/foo/bar", "foo/bar");
         assertRemoteFileEndpointFile("sftp://hostname/foo/bar/", "foo/bar/");
@@ -145,10 +142,6 @@ public class UriConfigurationTest extends CamelTestSupport {
         assertRemoteFileEndpointFile("sftp://hostname/foo", "foo");
         assertRemoteFileEndpointFile("sftp://hostname/", "");
         assertRemoteFileEndpointFile("sftp://hostname", "");
-        assertRemoteFileEndpointFile("sftp://hostname//", "/");
-        assertRemoteFileEndpointFile("sftp://hostname//foo/bar", "/foo/bar");
-        assertRemoteFileEndpointFile("sftp://hostname//foo/bar/", "/foo/bar/");
-        assertRemoteFileEndpointFile("ftps://user@hostname:123//foo/bar?password=secret", "/foo/bar");
         assertRemoteFileEndpointFile("ftps://user@hostname:123?password=secret", "");
         assertRemoteFileEndpointFile("ftps://hostname/foo/bar", "foo/bar");
         assertRemoteFileEndpointFile("ftps://hostname/foo/bar/", "foo/bar/");
@@ -156,9 +149,31 @@ public class UriConfigurationTest extends CamelTestSupport {
         assertRemoteFileEndpointFile("ftps://hostname/foo", "foo");
         assertRemoteFileEndpointFile("ftps://hostname/", "");
         assertRemoteFileEndpointFile("ftps://hostname", "");
-        assertRemoteFileEndpointFile("ftps://hostname//", "/");
-        assertRemoteFileEndpointFile("ftps://hostname//foo/bar", "/foo/bar");
-        assertRemoteFileEndpointFile("ftps://hostname//foo/bar/", "/foo/bar/");
+    }
+
+    @Test
+    public void testRemoteFileEndpointInvalidAbsolutePaths() {
+        String[] absolutePaths = new String[] {
+                "ftp://hostname//",
+                "ftp://hostname//foo/bar",
+                "ftp://hostname//foo/bar/",
+                "sftp://user@hostname:123//foo/bar?password=secret",
+                "sftp://hostname//",
+                "sftp://hostname//foo/bar",
+                "sftp://hostname//foo/bar/",
+                "ftps://user@hostname:123//foo/bar?password=secret",
+                "ftps://hostname//",
+                "ftps://hostname//foo/bar",
+                "ftps://hostname//foo/bar/"
+        };
+        for (String endpointUri : absolutePaths) {
+            try {
+                RemoteFileEndpoint<?> endpoint = resolveMandatoryEndpoint(context, endpointUri, RemoteFileEndpoint.class);
+                fail("Path \"" + endpointUri + "\" should be illegal");
+            } catch (ResolveEndpointFailedException e) {
+                assertTrue(e.getMessage().contains(endpointUri));
+            }
+        }
     }
 
     private void assertRemoteFileEndpointFile(String endpointUri, String expectedFile) {

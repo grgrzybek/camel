@@ -22,6 +22,7 @@ import java.util.Map;
 import com.jcraft.jsch.ChannelSftp;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.file.GenericFileEndpoint;
+import org.apache.camel.util.FileUtil;
 
 /**
  * Secure FTP Component
@@ -50,6 +51,8 @@ public class SftpComponent extends RemoteFileComponent<ChannelSftp.LsEntry> {
         // lets make sure we create a new configuration as each endpoint can
         // customize its own version
         SftpConfiguration config = new SftpConfiguration(new URI(baseUri));
+
+        FtpUtils.validateFtpDirectory(this, config.getDirectoryName());
 
         return new SftpEndpoint(uri, this, config);
     }

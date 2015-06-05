@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Stack;
 
+import org.apache.camel.Component;
 import org.apache.camel.util.FileUtil;
 
 /**
@@ -103,6 +104,20 @@ public final class FtpUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Checks whether directory used in ftp/ftps/sftp endpoint URI is relative.
+     * These components do not support absolute paths.
+     * @see <a href="http://camel.apache.org/ftp2.html">FTP/SFTP/FTPS Component</a>
+     * @param ftpComponent
+     * @param directory
+     */
+    public static void validateFtpDirectory(Component ftpComponent, String directory) {
+        if (FileUtil.hasLeadingSeparator(directory)) {
+            throw new IllegalArgumentException("Invalid directory: " + directory
+                    + ". " + ftpComponent.getClass().getSimpleName() + " supports only relative paths.");
+        }
     }
 
 }

@@ -50,6 +50,8 @@ public class FtpsComponent extends FtpComponent {
         // must pass on baseUri to the configuration (see above)
         FtpsConfiguration config = new FtpsConfiguration(new URI(baseUri));
 
+        FtpUtils.validateFtpDirectory(this, config.getDirectoryName());
+
         FtpsEndpoint endpoint = new FtpsEndpoint(uri, this, config);
         extractAndSetFtpClientKeyStoreParameters(parameters, endpoint);
         extractAndSetFtpClientTrustStoreParameters(parameters, endpoint);
